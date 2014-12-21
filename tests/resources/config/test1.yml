@@ -1,0 +1,5 @@
+connection:
+    server: server.host
+    port: 6667
+    channels: [ '#channel' ]
+    nick: nick

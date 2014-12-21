@@ -1,0 +1,9 @@
+#!/bin/env php
+<?php
+
+require dirname($argv[0]) . '/../vendor/autoload.php';
+
+(new Marmotz\WallIrc\Bot)
+    ->loadConfiguration(getcwd() . '/wallirc.yml')
+    ->start()
+;
