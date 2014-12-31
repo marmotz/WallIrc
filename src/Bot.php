@@ -63,11 +63,15 @@ class Bot
         foreach ($modules as $module) {
             $class = '\\' . ltrim($module, '\\');
 
+            echo "Load $class\n";
+
             (new $class)
                 ->setConfiguration($this->getConfiguration())
                 ->loadEvents($this->getIrcClient())
             ;
         }
+
+        echo "\n";
     }
 
     protected function loadIrcClient()
