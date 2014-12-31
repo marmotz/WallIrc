@@ -16,7 +16,8 @@
         "atoum/atoum"                : "~1.1",
         "atoum/visibility-extension" : "~1.0",
         "marmotz/dumper"             : "dev-master",
-        "fzaninotto/faker"           : "1.*"
+        "fzaninotto/faker"           : "1.*",
+        "roave/security-advisories"  : "dev-master"
     },
     "autoload": {
         "psr-4": {
