@@ -28,7 +28,14 @@ class Logger extends Module
 
     public function onPrivateMessage(Bucket $bucket) {
         $data = $bucket->getData();
-        dumpd($data);
+
+        $this->writeln(
+            sprintf(
+                '>> %s > %s',
+                $data['from']['nick'],
+                $data['message']
+            )
+        );
     }
 
     public function onMessage(Bucket $bucket) {
