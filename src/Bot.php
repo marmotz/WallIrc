@@ -2,7 +2,7 @@
 
 namespace Marmotz\WallIrc;
 
-use Hoa\Irc\Client as IrcClient;
+use Marmotz\WallIrc\Irc\Client as IrcClient;
 use Hoa\Socket\Client as SocketClient;
 use Hoa\Core\Event\Bucket;
 use Marmotz\WallIrc\ConfigurationLoader\File as ConfigurationFile;
@@ -54,11 +54,14 @@ class Bot
     {
         $modules = array_merge(
             array(
-                'Marmotz\WallIrc\Module\Logger\Logger',
                 'Marmotz\WallIrc\Module\AutoJoin\AutoJoin',
+                'Marmotz\WallIrc\Module\Commands\Commands',
+                'Marmotz\WallIrc\Module\Logger\Logger',
             ),
             $this->getConfiguration()->get('modules', array())
         );
+
+        echo "\n";
 
         foreach ($modules as $module) {
             $class = '\\' . ltrim($module, '\\');
