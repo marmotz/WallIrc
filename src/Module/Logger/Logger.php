@@ -43,7 +43,7 @@ class Logger extends Module
     public function onMessage(Bucket $bucket) {
         $data = $bucket->getData();
 
-        if ($data['me']) {
+        if ($data['isAction']) {
             $this->writeln(
                 sprintf(
                     '* %s %s',

@@ -151,12 +151,12 @@ class Client extends BaseClient
 
                     if (preg_match('/^\x01ACTION (?<message>.*)\x01$/', $message, $match)) {
                         $message = $match['message'];
-                        $me      = true;
+                        $isAction  = true;
                     } else {
-                        $me      = false;
+                        $isAction  = false;
                     }
 
-                    $mention = strpos($message, $username) !== false;
+                    $isMention = strpos($message, $username) !== false;
 
                     if($username === $middle) {
                         $listener = 'private-message';
@@ -168,11 +168,11 @@ class Client extends BaseClient
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
                         'message' => $message,
-                        'me'      => $me,
-                        'mention' => $mention,
+                        'isAction'  => $isAction,
+                        'isMention' => $isMention,
                     ];
 
-                    if ($mention) {
+                    if ($isMention) {
                         $this->_on->fire('mention', new Core\Event\Bucket($bucket));
                     }
                 break;
