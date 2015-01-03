@@ -31,12 +31,12 @@ class Logger extends Module
     public function onJoin(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
-                '%s joined %s',
-                isset($data['nickname']) ? $data['nickname'] : $data['from']['nick'],
-                $data['channel']
-            )
+                '%s joined the channel',
+                isset($data['nickname']) ? $data['nickname'] : $data['from']['nick']
+            ),
+            $data['channel']
         );
     }
 
@@ -44,28 +44,25 @@ class Logger extends Module
         $data = $bucket->getData();
 
         if ($data['isAction']) {
-            $this->writeln(
-                sprintf(
-                    '* %s %s',
-                    $data['from']['nick'],
-                    $data['message']
-                )
-            );
+            $format = '* %s %s';
         } else {
-            $this->writeln(
-                sprintf(
-                    '<%s> %s',
-                    $data['from']['nick'],
-                    $data['message']
-                )
-            );
+            $format = '<%s> %s';
         }
+
+        $this->log(
+            sprintf(
+                $format,
+                $data['from']['nick'],
+                $data['message']
+            ),
+            $data['channel']
+        );
     }
 
     public function onNick(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
                 '%s is now known as %s',
                 $data['from']['nick'],
@@ -77,42 +74,48 @@ class Logger extends Module
     public function onNotice(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
                 '%s ->%s<- %s',
                 $data['from']['nick'],
                 $data['to'],
                 $data['message']
-            )
+            ),
+            $data['channel']
         );
     }
 
     public function onOpen(Bucket $bucket) {
-        $this->writeln('Connection to ' . $bucket->getSource()->getConnection()->getStreamName() . ' opened.');
+        $this->log(
+            sprintf(
+                'Connection to %s opened.',
+                $bucket->getSource()->getConnection()->getStreamName()
+            )
+        );
     }
 
     public function onOtherMessage(Bucket $bucket) {
-        $this->writeln($bucket->getData()['line']);
+        $this->log($bucket->getData()['line']);
     }
 
     public function onPart(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
-                '%s left %s',
-                $data['from']['nick'],
-                $data['channel']
-            )
+                '%s left the channel',
+                $data['from']['nick']
+            ),
+            $data['channel']
         );
     }
 
     public function onPrivateMessage(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
-                '>> %s > %s',
+                '%s : %s',
                 $data['from']['nick'],
                 $data['message']
             )
@@ -122,7 +125,7 @@ class Logger extends Module
     public function onQuit(Bucket $bucket) {
         $data = $bucket->getData();
 
-        $this->writeln(
+        $this->log(
             sprintf(
                 '%s quit IRC (%s)',
                 $data['from']['nick'],
@@ -131,10 +134,11 @@ class Logger extends Module
         );
     }
 
-    protected function writeln($txt) {
+    protected function log($txt, $channel = null) {
         printf(
-            "[%s] %s\n",
+            "[%s] %s%s\n",
             date('H:i:s'),
+            $channel === null ? '' : "- $channel - ",
             $txt
         );
     }

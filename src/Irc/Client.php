@@ -158,19 +158,20 @@ class Client extends BaseClient
 
                     $isMention = strpos($message, $username) !== false;
 
-                    if($username === $middle) {
-                        $listener = 'private-message';
-                    } else {
-                        $node->setChannel($middle);
-                        $listener = 'message';
-                    }
-
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
                         'message' => $message,
                         'isAction'  => $isAction,
                         'isMention' => $isMention,
                     ];
+
+                    if($username === $middle) {
+                        $listener = 'private-message';
+                    } else {
+                        $node->setChannel($middle);
+                        $listener = 'message';
+                        $bucket['channel'] = $middle;
+                    }
 
                     if ($isMention) {
                         $this->_on->fire('mention', new Core\Event\Bucket($bucket));
