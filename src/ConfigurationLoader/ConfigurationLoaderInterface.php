@@ -2,7 +2,8 @@
 
 namespace Marmotz\WallIrc\ConfigurationLoader;
 
-interface ConfigurationLoaderInterface {
+interface ConfigurationLoaderInterface
+{
     public function loadFrom($from);
     public function getData();
 }

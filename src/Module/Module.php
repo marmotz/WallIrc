@@ -10,21 +10,14 @@ abstract class Module
 {
     protected $configuration;
 
-    public function getSubscribedEvents()
-    {
-        return array();
-    }
-
     public function getConfiguration()
     {
         return $this->configuration;
     }
 
-    public function setConfiguration(Configuration $configuration)
+    public function getSubscribedEvents()
     {
-        $this->configuration = $configuration;
-
-        return $this;
+        return array();
     }
 
     public function loadEvents(IrcClient $ircClient)
@@ -35,5 +28,12 @@ abstract class Module
                 array($this, $method)
             );
         }
+    }
+
+    public function setConfiguration(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+
+        return $this;
     }
 }

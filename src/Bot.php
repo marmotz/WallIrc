@@ -40,14 +40,19 @@ class Bot
         return $this->ircClient;
     }
 
-    protected function setConfiguration(Configuration $configuration)
+    protected function loadIrcClient()
     {
-        $this->configuration = $configuration;
-
-        $this->loadIrcClient();
-        $this->loadModules();
-
-        return $this;
+        $this->setIrcClient(
+            new IrcClient(
+                new SocketClient(
+                    sprintf(
+                        'tcp://%s:%d',
+                        $this->getConfiguration()->get('connection.server'),
+                        $this->getConfiguration()->get('connection.port')
+                    )
+                )
+            )
+        );
     }
 
     protected function loadModules()
@@ -77,19 +82,14 @@ class Bot
         echo "\n";
     }
 
-    protected function loadIrcClient()
+    protected function setConfiguration(Configuration $configuration)
     {
-        $this->setIrcClient(
-            new IrcClient(
-                new SocketClient(
-                    sprintf(
-                        'tcp://%s:%d',
-                        $this->getConfiguration()->get('connection.server'),
-                        $this->getConfiguration()->get('connection.port')
-                    )
-                )
-            )
-        );
+        $this->configuration = $configuration;
+
+        $this->loadIrcClient();
+        $this->loadModules();
+
+        return $this;
     }
 
     protected function setIrcClient(IrcClient $ircClient)

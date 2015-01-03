@@ -4,7 +4,8 @@ namespace Marmotz\WallIrc\ConfigurationLoader;
 
 use Symfony\Component\Yaml\Yaml;
 
-class File {
+class File
+{
     static public function load($filepath)
     {
         switch (strtolower(substr($filepath, strrpos($filepath, '.') + 1))) {

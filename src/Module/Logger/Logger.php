@@ -7,6 +7,16 @@ use Marmotz\WallIrc\Module\Module;
 
 class Logger extends Module
 {
+    protected $currentLogFileName;
+    protected $currentLogFile;
+
+    public function __destruct()
+    {
+        if ($this->currentLogFile) {
+            fclose($this->currentLogFile);
+        }
+    }
+
     public function getSubscribedEvents()
     {
         return array(
@@ -23,24 +33,30 @@ class Logger extends Module
         );
     }
 
-    public function onError(Bucket $bucket) {
-        $data = $bucket->getData();
-        dumpd($data);
-    }
-
-    public function onJoin(Bucket $bucket) {
+    public function onError(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
-        $this->log(
-            sprintf(
-                '%s joined the channel',
-                isset($data['nickname']) ? $data['nickname'] : $data['from']['nick']
-            ),
-            $data['channel']
-        );
+        $this->log(print_r($data, true));
     }
 
-    public function onMessage(Bucket $bucket) {
+    public function onJoin(Bucket $bucket)
+    {
+        $data = $bucket->getData();
+
+        if (isset($data['from']['nick'])) {
+            $this->log(
+                sprintf(
+                    '%s joined the channel',
+                    $data['from']['nick']
+                ),
+                $data['channel']
+            );
+        }
+    }
+
+    public function onMessage(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         if ($data['isAction']) {
@@ -59,7 +75,8 @@ class Logger extends Module
         );
     }
 
-    public function onNick(Bucket $bucket) {
+    public function onNick(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         $this->log(
@@ -71,7 +88,8 @@ class Logger extends Module
         );
     }
 
-    public function onNotice(Bucket $bucket) {
+    public function onNotice(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         $this->log(
@@ -85,7 +103,8 @@ class Logger extends Module
         );
     }
 
-    public function onOpen(Bucket $bucket) {
+    public function onOpen(Bucket $bucket)
+    {
         $this->log(
             sprintf(
                 'Connection to %s opened.',
@@ -94,11 +113,13 @@ class Logger extends Module
         );
     }
 
-    public function onOtherMessage(Bucket $bucket) {
+    public function onOtherMessage(Bucket $bucket)
+    {
         $this->log($bucket->getData()['line']);
     }
 
-    public function onPart(Bucket $bucket) {
+    public function onPart(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         $this->log(
@@ -110,7 +131,8 @@ class Logger extends Module
         );
     }
 
-    public function onPrivateMessage(Bucket $bucket) {
+    public function onPrivateMessage(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         $this->log(
@@ -122,7 +144,8 @@ class Logger extends Module
         );
     }
 
-    public function onQuit(Bucket $bucket) {
+    public function onQuit(Bucket $bucket)
+    {
         $data = $bucket->getData();
 
         $this->log(
@@ -134,12 +157,44 @@ class Logger extends Module
         );
     }
 
-    protected function log($txt, $channel = null) {
-        printf(
+    protected function getLogFile()
+    {
+        if ($this->getConfiguration()->has('configuration.logger.file')) {
+            $currentLogFileName = strftime($this->getConfiguration()->get('configuration.logger.file'));
+
+            if ($currentLogFileName !== $this->currentLogFileName) {
+                echo "Starting to write logs in $currentLogFileName\n";
+
+                $this->currentLogFileName = $currentLogFileName;
+
+                if ($this->currentLogFile) {
+                    fclose($this->currentLogFile);
+                }
+
+                $this->currentLogFile = fopen($currentLogFileName, 'a');
+            }
+        } else {
+            $this->currentLogFile = null;
+        }
+
+        return $this->currentLogFile;
+    }
+
+    protected function log($txt, $channel = null)
+    {
+        $toLog = sprintf(
             "[%s] %s%s\n",
             date('H:i:s'),
-            $channel === null ? '' : "- $channel - ",
+            $channel === null ? '' : "($channel) ",
             $txt
         );
+
+        echo $toLog;
+
+        $logFile = $this->getLogFile();
+
+        if ($logFile) {
+            fwrite($logFile, $toLog);
+        }
     }
 }
