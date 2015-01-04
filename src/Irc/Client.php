@@ -22,6 +22,7 @@ class Client extends BaseClient
 
         $this->_on->addIds(
             [
+                'mode',
                 'nick',
                 'notice',
                 'part',
@@ -100,6 +101,19 @@ class Client extends BaseClient
                     $bucket   = [
                         'from'    => $this->parseNick($matches['prefix']),
                         'channel' => trim($channel)
+                    ];
+                break;
+
+                case 'MODE':
+                    $listener = 'mode';
+
+                    list($channel, $mode, $nick) = explode(' ', trim($matches['middle']));
+
+                    $bucket = [
+                        'from'    => $this->parseNick($matches['prefix']),
+                        'channel' => $channel,
+                        'mode'    => $mode,
+                        'nick'    => $nick,
                     ];
                 break;
 
