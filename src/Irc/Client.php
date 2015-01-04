@@ -50,7 +50,7 @@ class Client extends BaseClient
         }
 
         try {
-            $line = $node->getConnection()->readLine();
+            $line = trim($node->getConnection()->readLine());
 
             preg_match(
                 '#^(?::(?<prefix>[^\s]+)\s+)?(?<command>[^\s]+)\s+(?<middle>[^:]+)?(:\s*(?<trailing>.+))?$#',
@@ -58,8 +58,11 @@ class Client extends BaseClient
                 $matches
             );
 
-            if(!isset($matches['command']))
+            if(!isset($matches['command'])) {
                 $matches['command'] = null;
+            }
+
+            $listener = null;
 
             switch($matches['command']) {
                 case 366: // RPL_ENDOFNAMES
@@ -69,7 +72,7 @@ class Client extends BaseClient
                     $listener = 'join';
                     $bucket   = [
                         'nickname' => $nickname,
-                        'channel'  => trim($channel),
+                        'channel'  => $channel,
                     ];
                 break;
 
@@ -80,8 +83,8 @@ class Client extends BaseClient
                     $listener = 'invite';
                     $bucket   = [
                         'from'               => $this->parseNick($matches['prefix']),
-                        'channel'            => trim($channel),
-                        'invitation_channel' => trim($matches['trailing']),
+                        'channel'            => $channel,
+                        'invitation_channel' => $matches['trailing'],
                     ];
                 break;
 
@@ -89,7 +92,7 @@ class Client extends BaseClient
                     $listener = 'join';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => isset($matches['trailing']) ? trim($matches['trailing']) : trim($matches['middle']),
+                        'channel' => isset($matches['trailing']) ? $matches['trailing'] : $matches['middle'],
                     ];
                 break;
 
@@ -100,28 +103,32 @@ class Client extends BaseClient
                     $listener = 'kick';
                     $bucket   = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => trim($channel),
+                        'channel' => $channel,
                     ];
                 break;
 
                 case 'MODE':
-                    $listener = 'mode';
+                    $modeParts = explode(' ', $matches['middle']);
 
-                    list($channel, $mode, $nick) = explode(' ', trim($matches['middle']));
+                    if (count($modeParts) === 3) {
+                        $listener = 'mode';
 
-                    $bucket = [
-                        'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => $channel,
-                        'mode'    => $mode,
-                        'nick'    => $nick,
-                    ];
+                        list($channel, $mode, $nick) = explode(' ', $matches['middle']);
+
+                        $bucket = [
+                            'from'    => $this->parseNick($matches['prefix']),
+                            'channel' => $channel,
+                            'mode'    => $mode,
+                            'nick'    => $nick,
+                        ];
+                    }
                 break;
 
                 case 'NICK':
                     $listener = 'nick';
                     $bucket = [
                         'from' => $this->parseNick($matches['prefix']),
-                        'nick' => trim($matches['trailing']),
+                        'nick' => $matches['trailing'],
                     ];
                 break;
 
@@ -129,10 +136,10 @@ class Client extends BaseClient
                     $listener = 'notice';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'to'      => trim($matches['middle']),
-                        'nick'    => substr($matches['middle'], 0, 1) !== '#' ? trim($matches['middle']) : null,
-                        'channel' => substr($matches['middle'], 0, 1) === '#' ? trim($matches['middle']) : null,
-                        'message' => trim($matches['trailing']),
+                        'to'      => $matches['middle'],
+                        'nick'    => substr($matches['middle'], 0, 1) !== '#' ? $matches['middle'] : null,
+                        'channel' => substr($matches['middle'], 0, 1) === '#' ? $matches['middle'] : null,
+                        'message' => $matches['trailing'],
                     ];
                 break;
 
@@ -140,7 +147,7 @@ class Client extends BaseClient
                     $listener = 'part';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => trim($matches['middle']),
+                        'channel' => $matches['middle'],
                     ];
                 break;
 
@@ -159,8 +166,8 @@ class Client extends BaseClient
                 break;
 
                 case 'PRIVMSG':
-                    $middle   = trim($matches['middle']);
-                    $message  = trim($matches['trailing']);
+                    $middle   = $matches['middle'];
+                    $message  = $matches['trailing'];
                     $username = $node->getUsername();
 
                     if (preg_match('/^\x01ACTION (?<message>.*)\x01$/', $message, $match)) {
@@ -196,16 +203,17 @@ class Client extends BaseClient
                     $listener = 'quit';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'message' => trim($matches['trailing']),
+                        'message' => $matches['trailing'],
                     ];
                 break;
+            }
 
-                default:
-                    $listener = 'other-message';
-                    $bucket   = [
-                        'line'        => $line,
-                        'parsed_line' => $matches,
-                    ];
+            if ($listener === null) {
+                $listener = 'other-message';
+                $bucket   = [
+                    'line'        => $line,
+                    'parsed_line' => $matches,
+                ];
             }
 
             $this->_on->fire($listener, new Core\Event\Bucket($bucket));
