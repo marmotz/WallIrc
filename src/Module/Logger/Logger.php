@@ -23,6 +23,7 @@ class Logger extends Module
             'error'           => 'onError',
             'join'            => 'onJoin',
             'message'         => 'onMessage',
+            'mode'            => 'onMode',
             'nick'            => 'onNick',
             'notice'          => 'onNotice',
             'open'            => 'onOpen',
@@ -72,6 +73,20 @@ class Logger extends Module
                 $data['message']
             ),
             $data['channel']
+        );
+    }
+
+    public function onMode(Bucket $bucket)
+    {
+        $data = $bucket->getData();
+
+        $this->log(
+            sprintf(
+                '%s sets mode %s to %s',
+                $data['from']['nick'],
+                $data['mode'],
+                $data['nick']
+            )
         );
     }
 

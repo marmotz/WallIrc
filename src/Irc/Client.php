@@ -69,7 +69,7 @@ class Client extends BaseClient
                     $listener = 'join';
                     $bucket   = [
                         'nickname' => $nickname,
-                        'channel'  => trim($channel)
+                        'channel'  => trim($channel),
                     ];
                 break;
 
@@ -81,7 +81,7 @@ class Client extends BaseClient
                     $bucket   = [
                         'from'               => $this->parseNick($matches['prefix']),
                         'channel'            => trim($channel),
-                        'invitation_channel' => trim($matches['trailing'])
+                        'invitation_channel' => trim($matches['trailing']),
                     ];
                 break;
 
@@ -89,7 +89,7 @@ class Client extends BaseClient
                     $listener = 'join';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => trim($matches['trailing'])
+                        'channel' => isset($matches['trailing']) ? trim($matches['trailing']) : trim($matches['middle']),
                     ];
                 break;
 
@@ -100,7 +100,7 @@ class Client extends BaseClient
                     $listener = 'kick';
                     $bucket   = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => trim($channel)
+                        'channel' => trim($channel),
                     ];
                 break;
 
@@ -121,7 +121,7 @@ class Client extends BaseClient
                     $listener = 'nick';
                     $bucket = [
                         'from' => $this->parseNick($matches['prefix']),
-                        'nick' => trim($matches['trailing'])
+                        'nick' => trim($matches['trailing']),
                     ];
                 break;
 
@@ -140,7 +140,7 @@ class Client extends BaseClient
                     $listener = 'part';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'channel' => trim($matches['middle'])
+                        'channel' => trim($matches['middle']),
                     ];
                 break;
 
@@ -148,7 +148,7 @@ class Client extends BaseClient
                     $daemons  = explode(' ', $matches['trailing']);
                     $listener = 'ping';
                     $bucket   = [
-                        'daemons' => $daemons
+                        'daemons' => $daemons,
                     ];
 
                     if(isset($daemons[1])) {
@@ -196,7 +196,7 @@ class Client extends BaseClient
                     $listener = 'quit';
                     $bucket = [
                         'from'    => $this->parseNick($matches['prefix']),
-                        'message' => trim($matches['trailing'])
+                        'message' => trim($matches['trailing']),
                     ];
                 break;
 
@@ -204,7 +204,7 @@ class Client extends BaseClient
                     $listener = 'other-message';
                     $bucket   = [
                         'line'        => $line,
-                        'parsed_line' => $matches
+                        'parsed_line' => $matches,
                     ];
             }
 
