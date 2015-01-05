@@ -70,7 +70,7 @@ class Logger extends Module
             sprintf(
                 $format,
                 $data['from']['nick'],
-                $data['message']
+                \ForceUTF8\Encoding::fixUTF8($data['message'])
             ),
             $data['channel']
         );
@@ -110,7 +110,7 @@ class Logger extends Module
         $this->log(
             sprintf(
                 '%s ->%s<- %s',
-                $data['from']['nick'],
+                isset($data['from']['nick']) ? $data['from']['nick'] : '-',
                 $data['to'],
                 $data['message']
             ),
