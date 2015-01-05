@@ -62,6 +62,14 @@ class Client extends BaseClient
                 $matches['command'] = null;
             }
 
+            if (isset($matches['middle'])) {
+                $matches['middle'] = trim($matches['middle']);
+            }
+
+            if (isset($matches['trailing'])) {
+                $matches['trailing'] = trim($matches['trailing']);
+            }
+
             $listener = null;
 
             switch($matches['command']) {
